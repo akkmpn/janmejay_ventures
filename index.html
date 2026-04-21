@@ -12,6 +12,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <!-- Leaflet Map Library (Free Maps) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <style>
         /* --- CSS VARIABLES & RESET --- */
@@ -391,7 +394,53 @@
             transform: translateY(0);
             opacity: 1;
         }
+                /* --- MAP STYLES --- */
+        .map-wrapper {
+            border: 1px solid #e5e7eb;
+            border-radius: var(--radius);
+            overflow: hidden;
+            height: 250px;
+            position: relative;
+        }
 
+        .map-box {
+            height: 100%;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .map-controls {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            left: 10px;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .map-controls small {
+            color: #1f2937;
+            font-size: 0.8rem;
+        }
+
+        .location-btn {
+            background-color: var(--primary-dark);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .location-btn:hover {
+            background-color: var(--primary-color);
+        }
     </style>
 </head>
 <body>
@@ -522,17 +571,18 @@
         </div>
     </section>
 
-    <!-- Booking Section -->
+        <!-- Booking Section -->
     <section id="booking" class="section-padding booking-section">
         <div class="container">
             <div class="text-center" style="margin-bottom: 2rem;">
                 <h2 class="section-title">Book Your Ride</h2>
-                <p>Fill the form below to check availability or get a quote.</p>
+                <p>Fill form below. <b>Search map to select pickup/destination!</b></p>
             </div>
 
             <div class="booking-container">
                 <form id="taxiForm">
                     <div class="form-grid">
+                        <!-- Name & Phone -->
                         <div class="form-group">
                             <label for="name">Your Name</label>
                             <input type="text" id="name" placeholder="Enter full name" required>
@@ -541,14 +591,40 @@
                             <label for="phone">Phone Number</label>
                             <input type="tel" id="phone" placeholder="e.g. 98765xxxxx" required>
                         </div>
-                        <div class="form-group">
-                            <label for="pickup">Pickup Location</label>
-                            <input type="text" id="pickup" placeholder="City or Address" required>
+                        
+                        <!-- 🗺️ PICKUP LOCATION (WITH MAP) -->
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Pickup Location</label>
+                            <!-- Hidden input to store the text value -->
+                            <input type="text" id="pickup" placeholder="Select on Map" required readonly style="background-color: #e5e7eb; cursor: pointer;">
+                            
+                            <!-- 🗺️ MAP CONTAINER -->
+                            <div class="map-wrapper">
+                                <div id="pickupMap" class="map-box"></div>
+                                <div class="map-controls">
+                                    <button type="button" onclick="setCurrentLocation()" class="location-btn">
+                                        <i class="fas fa-crosshairs"></i> Use GPS
+                                    </button>
+                                    <small>Click map to set address</small>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="drop">Destination</label>
-                            <input type="text" id="drop" placeholder="e.g. Ayodhya" required>
+                        
+                        <!-- 🗺️ DESTINATION (WITH MAP) -->
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Destination</label>
+                            <input type="text" id="drop" placeholder="Select on Map" required readonly style="background-color: #e5e7eb; cursor: pointer;">
+
+                            <!-- 🗺️ MAP CONTAINER -->
+                            <div class="map-wrapper">
+                                <div id="dropMap" class="map-box"></div>
+                                <div class="map-controls">
+                                    <small>Search city (e.g. "Ayodhya") and click map to select</small>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Date & Type -->
                         <div class="form-group">
                             <label for="date">Travel Date</label>
                             <input type="date" id="date" required>
@@ -561,7 +637,7 @@
                             </select>
                         </div>
                         
-                        <!-- ✅ RADIO BUTTONS ADDED HERE -->
+                        <!-- Contact Method -->
                         <div class="full-width form-group">
                             <label>Preferred Contact Method</label>
                             <div style="display: flex; gap: 20px; margin-top: 5px;">
@@ -615,7 +691,7 @@
     </div>
 
     <!-- Scripts -->
-       <script>
+    <script>
         document.getElementById('taxiForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -642,12 +718,10 @@
 
             // 4. Send based on choice
             if (contactMethod === 'whatsapp') {
-                // WHATSAPP
                 const encodedMessage = encodeURIComponent(baseMessage).replace(/%0A/g, '%0A'); 
                 const whatsappUrl = `https://wa.me/918009136859?text=${encodedMessage}`;
                 window.open(whatsappUrl, '_blank');
             } else {
-                // EMAIL
                 const emailBody = baseMessage + "\n\n(Contact this mail for further queries or book)";
                 const subject = encodeURIComponent("New Taxi Booking Request");
                 const body = encodeURIComponent(emailBody);
@@ -658,31 +732,46 @@
             this.reset();
         });
 
-        // 🗺️ NEW: Function to Get User's Location
-        function getLocation() {
-            const pickupInput = document.getElementById('pickup');
+        // 🗺️ MAP LOGIC (Pickup)
+        let pickupMap, dropMap;
+        
+        // Init Maps when page loads
+        window.onload = function() {
+            // Default Center View (Ayodhya/Gorakhpur area)
+            const defaultLat = 26.7951;
+            const defaultLng = 82.1924;
+
+            // Init Pickup Map
+            pickupMap = L.map('pickupMap').setView([defaultLat, defaultLng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickupMap);
             
-            if (navigator.geolocation) {
-                // Show user something is happening
-                pickupInput.value = "Detecting location...";
+            // Init Destination Map
+            dropMap = L.map('dropMap').setView([defaultLat, defaultLng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(dropMap);
+
+            // Pickup Click Logic
+            pickupMap.on('click', function(e) {
+                const latlng = e.latlng;
                 
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        // SUCCESS: Fills input with "Current GPS Location" 
-                        // (We don't show raw coordinates like "26.45, 81.23" because user prefers text)
-                        pickupInput.value = "Current GPS Location (Click to Edit)";
-                    },
-                    (error) => {
-                        // ERROR: Fills input with error or asks user to type
-                        console.error("Geolocation error:", error);
-                        pickupInput.value = "Could not detect location. Please type manually.";
-                    }
-                );
-            } else {
-                // If browser doesn't support Geolocation
-                alert("Geolocation is not supported by this browser.");
-            }
-        }
+                // Reverse Geocode (Get City Name from Lat/Lng)
+                // We use a free service to get the name of the location they clicked
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.address && data.address.city) {
+                            const address = `${data.address.city}, ${data.address.state || ''}`; // e.g., "Ayodhya, Uttar Pradesh"
+                            document.getElementById('pickup').value = address;
+                            
+                            // Visual Feedback (Green Border)
+                            document.getElementById('pickup').style.borderColor = "#10B981";
+                        }
+                    });
+            });
+
+            // Destination Logic (Move Map on Search)
+            const searchControl = L.control({position: 'topleft'}).addTo(dropMap);
+            searchControl.addTo(dropMap);
+        };
     </script>
 </body>
 </html>
