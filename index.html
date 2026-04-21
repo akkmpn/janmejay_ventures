@@ -628,7 +628,7 @@
             // 2. Get Contact Preference
             const contactMethod = document.querySelector('input[name="contactMethod"]:checked').value;
 
-            // 3. Create Base Message (Clean - No Extra Text)
+            // 3. Create Base Message
             const baseMessage = `New Booking Request (Janmejay Ventures)\n` +
                             `-----------------------\n` +
                             `Name: ${name}\n` +
@@ -640,18 +640,30 @@
 
             // 4. Send based on choice
             if (contactMethod === 'whatsapp') {
-                // 👇 WHATSAPP: Uses ONLY Clean Message 👇
+                // WHATSAPP: Works normally
                 const encodedMessage = encodeURIComponent(baseMessage).replace(/%0A/g, '%0A'); 
                 const whatsappUrl = `https://wa.me/918009136859?text=${encodedMessage}`;
                 window.open(whatsappUrl, '_blank');
             } else {
-                // 👇 EMAIL: Adds Extra Line at Bottom 👇
-                const emailBody = baseMessage + "\n\n(Contact this mail for further queries or book)";
+                // EMAIL: Use 'Simulate Click' Method for Telegram/In-built browsers
                 const subject = encodeURIComponent("New Taxi Booking Request");
-                const body = encodeURIComponent(emailBody);
+                const body = encodeURIComponent(baseMessage);
                 
-                // Opens Email App directly
-                window.open("mailto:janmejaip@gmail.com?subject=" + subject + "&body=" + body, "_self");
+                // We use ?to= explicitly to try and force the email address
+                const mailtoLink = `mailto:?to=janmejaip@gmail.com&subject=${subject}&body=${body}`;
+                
+                // Create a temporary link element
+                const a = document.createElement('a');
+                a.href = mailtoLink;
+                
+                // Add to body (required for some browsers to register element)
+                document.body.appendChild(a);
+                
+                // Simulate a mouse click
+                a.click();
+                
+                // Remove element
+                document.body.removeChild(a);
             }
 
             // 5. Clear form
