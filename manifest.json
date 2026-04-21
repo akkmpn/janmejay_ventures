@@ -7,12 +7,12 @@
   "theme_color": "#f7c948",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/512/taxi-icon.png",
+      "src": "icon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/512/taxi-icon.png",
+      "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
