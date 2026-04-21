@@ -718,10 +718,12 @@
 
             // 4. Send based on choice
             if (contactMethod === 'whatsapp') {
+                // WHATSAPP
                 const encodedMessage = encodeURIComponent(baseMessage).replace(/%0A/g, '%0A'); 
                 const whatsappUrl = `https://wa.me/918009136859?text=${encodedMessage}`;
                 window.open(whatsappUrl, '_blank');
             } else {
+                // EMAIL
                 const emailBody = baseMessage + "\n\n(Contact this mail for further queries or book)";
                 const subject = encodeURIComponent("New Taxi Booking Request");
                 const body = encodeURIComponent(emailBody);
@@ -732,46 +734,114 @@
             this.reset();
         });
 
-        // 🗺️ MAP LOGIC (Pickup)
+        // 🗺️ MAP LOGIC (ROBUSTED & FIXED)
         let pickupMap, dropMap;
-        
-        // Init Maps when page loads
+
         window.onload = function() {
             // Default Center View (Ayodhya/Gorakhpur area)
             const defaultLat = 26.7951;
             const defaultLng = 82.1924;
 
-            // Init Pickup Map
-            pickupMap = L.map('pickupMap').setView([defaultLat, defaultLng], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickupMap);
-            
-            // Init Destination Map
-            dropMap = L.map('dropMap').setView([defaultLat, defaultLng], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(dropMap);
-
-            // Pickup Click Logic
-            pickupMap.on('click', function(e) {
-                const latlng = e.latlng;
+            // 1. Init Pickup Map
+            try {
+                pickupMap = L.map('pickupMap').setView([defaultLat, defaultLng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickupMap);
                 
-                // Reverse Geocode (Get City Name from Lat/Lng)
-                // We use a free service to get the name of the location they clicked
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if(data.address && data.address.city) {
-                            const address = `${data.address.city}, ${data.address.state || ''}`; // e.g., "Ayodhya, Uttar Pradesh"
-                            document.getElementById('pickup').value = address;
-                            
-                            // Visual Feedback (Green Border)
-                            document.getElementById('pickup').style.borderColor = "#10B981";
-                        }
-                    });
-            });
+                // 2. Init Destination Map
+                dropMap = L.map('dropMap').setView([defaultLat, defaultLng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(dropMap);
 
-            // Destination Logic (Move Map on Search)
-            const searchControl = L.control({position: 'topleft'}).addTo(dropMap);
-            searchControl.addTo(dropMap);
+                // 3. Add Search to Destination Map (Only)
+                const searchControl = L.control({position: 'topleft'}).addTo(dropMap);
+
+                // 4. Add Zoom Control to Both Maps
+                L.control.zoom({position: 'topright'}).addTo(pickupMap);
+                L.control.zoom({position: 'topright'}).addTo(dropMap);
+
+            } catch (error) {
+                console.error("Error loading maps:", error);
+                alert("Maps failed to load. Refresh page.");
+            }
         };
+
+        // 📍 GET LOCATION FUNCTION (FIXED)
+        function getCurrentLocation() {
+            const pickupInput = document.getElementById('pickup');
+            
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by this browser.");
+                return;
+            }
+
+            // Show loading text
+            pickupInput.value = "Locating...";
+
+            navigator.geolocation.getCurrentPosition({
+                enableHighAccuracy: true,
+                timeout: 10000 // 10 second timeout
+            }, 
+            (position) => {
+                // Success
+                const lat = position.coords.latitude.toFixed(4);
+                const lng = position.coords.longitude.toFixed(4);
+                
+                // Fly to User's Location (Zoom level 14-16)
+                pickupMap.flyTo([lat, lng], 14);
+
+                // 📍 Add User's Marker (Blue Pin)
+                L.marker([lat, lng], {
+                    title: "You are here",
+                    draggable: false,
+                    icon: L.icon({
+                        iconUrl: 'https://cdn-icons-png.flaticon.com/512/512/taxi-icon.png',
+                        iconSize: [40, 40],
+                        iconAnchor: [20, 40]
+                    })
+                }).addTo(pickupMap);
+
+                // ✅ Feedback: Fill input with friendly text
+                pickupInput.value = "Current GPS Location (Click map to edit)";
+
+                // 🟢 Visual Feedback: Green Border
+                pickupInput.style.borderColor = "#10B981";
+
+            }, 
+            (error) => {
+                console.error("Geolocation error:", error);
+                
+                // 📵 USER FRIENDLY ALERT
+                if(error.code === 1) {
+                    alert("Location permission denied. Please allow access or type your address manually.");
+                } else {
+                    alert("Could not find location: " + error.message + ". Please type your address manually.");
+                }
+                
+                pickupInput.value = "";
+                pickupInput.style.borderColor = "#d1d5db"; // Reset border color on error
+            });
+        }
+
+        // 🔍 MAP CLICK HANDLER (ONLY FOR PICKUP)
+        // This ensures clicking Pickup Map ONLY affects Pickup
+        pickupMap.on('click', function(e) {
+            const latlng = e.latlng;
+            
+            // 1. Get Name (Reverse Geocode)
+            // Using fetch with 'no-cors' to avoid blocking on local files
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`)
+            .then(response => {
+                if(response && response.address && response.address.city) {
+                    const address = `${response.address.city}, ${response.address.state || ''}`;
+                    document.getElementById('pickup').value = address;
+                    
+                    // Visual Feedback
+                    document.getElementById('pickup').style.borderColor = "#10B981";
+                })
+                .catch(error => {
+                    console.error("Address fetch error:", error);
+                    alert("Could not fetch address (Error: " + error.message + "). Please type manually.");
+                });
+        });
     </script>
 </body>
 </html>
