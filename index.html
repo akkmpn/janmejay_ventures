@@ -611,7 +611,7 @@
         <span>Booking Request Sent! We will call you shortly.</span>
     </div>
 
-       <script>
+              <script>
         document.getElementById('taxiForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -627,9 +627,8 @@
             const contactMethod = document.querySelector('input[name="contactMethod"]:checked').value;
 
             // 3. Define Owner Details
-            // (Using your email for testing)
             const ownerPhoneNumber = "917596993070"; 
-            const ownerEmail = "akkmpn@gmail.com";
+            const ownerEmail = "janmejaip@gmail.com"; // FATHER'S EMAIL
 
             // 4. Create Message Text
             const messageText = `New Booking Request (Janmejay Ventures)\n` +
@@ -643,12 +642,10 @@
 
             // 5. Send based on choice
             if (contactMethod === 'whatsapp') {
-                // Encode for URL
                 const encodedMessage = encodeURIComponent(messageText).replace(/%0A/g, '%0A'); 
                 const whatsappUrl = `https://wa.me/${ownerPhoneNumber}?text=${encodedMessage}`;
                 window.open(whatsappUrl, '_blank');
             } else {
-                // Send via Email
                 const subject = encodeURIComponent("New Taxi Booking Request");
                 const body = encodeURIComponent(messageText);
                 window.location.href = `mailto:${ownerEmail}?subject=${subject}&body=${body}`;
