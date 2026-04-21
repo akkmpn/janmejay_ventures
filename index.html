@@ -1,0 +1,626 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Janmejay Ventures | Best Taxi Service</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --primary-color: #f7c948; /* Taxi Yellow */
+            --primary-dark: #e0b12c;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --white: #ffffff;
+            --bg-light: #f9fafb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 8px;
+            --max-width: 1200px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            color: var(--text-dark);
+            background-color: var(--white);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* --- UTILITIES --- */
+        .container {
+            width: 90%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .section-padding {
+            padding: 4rem 0;
+        }
+
+        .text-center { text-align: center; }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--primary-color);
+            color: var(--text-dark);
+            font-weight: 600;
+            border-radius: var(--radius);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .section-subtitle {
+            color: var(--primary-dark);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i { color: var(--primary-dark); }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--primary-dark); }
+
+        .cta-nav {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .cta-nav { display: block; }
+            .mobile-menu-btn { display: none; }
+        }
+
+        @media (max-width: 767px) {
+            .nav-links { display: none; } /* Simplified for mobile */
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://picsum.photos/seed/taxiroad/1920/1080');
+            background-size: cover;
+            background-position: center;
+            height: 85vh;
+            display: flex;
+            align-items: center;
+            color: var(--white);
+            text-align: center;
+        }
+
+        .hero-content h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            color: #e5e7eb;
+        }
+
+        /* --- ABOUT THE CAR --- */
+        .about-section {
+            background-color: var(--bg-light);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .about-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .car-image img {
+            width: 100%;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            /* Placeholder for the Ertiga */
+            object-fit: cover;
+            height: 400px;
+        }
+
+        .features-list {
+            margin-top: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .feature-item i {
+            color: var(--primary-dark);
+            background: #fff9c4;
+            padding: 10px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- POPULAR ROUTES --- */
+        .routes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .route-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+            border: 1px solid #e5e7eb;
+        }
+
+        .route-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+
+        .route-img {
+            height: 180px;
+            background-color: #ddd;
+            overflow: hidden;
+        }
+        
+        .route-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .route-info {
+            padding: 1.5rem;
+        }
+
+        .route-info h3 { margin-bottom: 0.5rem; }
+        .route-info p { color: var(--text-light); font-size: 0.9rem; margin-bottom: 1rem; }
+        
+        .route-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            font-weight: 600;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 1rem;
+        }
+
+        /* --- BOOKING FORM --- */
+        .booking-section {
+            background-color: var(--primary-color);
+            color: var(--text-dark);
+        }
+
+        .booking-container {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 600px) {
+            .form-grid { grid-template-columns: 1fr 1fr; }
+            .full-width { grid-column: span 2; }
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .form-group input, 
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #d1d5db;
+            border-radius: var(--radius);
+            font-size: 1rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(247, 201, 72, 0.3);
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            background-color: #111827;
+            color: #9ca3af;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .footer-logo {
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .contact-info {
+            margin: 1.5rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .contact-info div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            margin-top: 1rem;
+            transition: opacity 0.3s;
+        }
+        
+        .whatsapp-btn:hover { opacity: 0.9; }
+
+        /* --- TOAST NOTIFICATION --- */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #10B981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-taxi"></i> Janmejay Ventures
+                </div>
+                <div class="nav-links">
+                    <a href="#home">Home</a>
+                    <a href="#about">Our Car</a>
+                    <a href="#routes">Routes</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                <a href="#booking" class="btn cta-nav">Book Now</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container hero-content">
+            <h1>Comfortable Rides to <br> Gorakhpur, Ayodhya & Beyond</h1>
+            <p>Reliable, Safe, and Affordable Outstation Taxi Service. Experience the comfort of a White Ertiga VXI for your family trips.</p>
+            <a href="#booking" class="btn" style="font-size: 1.1rem; padding: 1rem 2rem;">Book Your Ride</a>
+        </div>
+    </section>
+
+    <!-- About Car Section -->
+    <section id="about" class="section-padding about-section">
+        <div class="container">
+            <div class="about-grid">
+                <div class="car-image">
+                    <!-- Using a generic car image since I can't generate a specific Ertiga photo -->
+                    <img src="https://picsum.photos/seed/ertiga/600/400" alt="White Maruti Suzuki Ertiga Taxi">
+                </div>
+                <div class="car-details">
+                    <span class="section-subtitle">The Vehicle</span>
+                    <h2 class="section-title">Spacious White Ertiga VXI</h2>
+                    <p>Travel in comfort with our well-maintained Maruti Suzuki Ertiga VXI. Perfect for long journeys and family pilgrimages, offering ample legroom and luggage space.</p>
+                    
+                    <div class="features-list">
+                        <div class="feature-item"><i class="fas fa-users"></i> 7 Seater</div>
+                        <div class="feature-item"><i class="fas fa-gas-pump"></i> CNG & Petrol</div>
+                        <div class="feature-item"><i class="fas fa-snowflake"></i> AC / Heater</div>
+                        <div class="feature-item"><i class="fas fa-suitcase"></i> Boot Space</div>
+                        <div class="feature-item"><i class="fas fa-couch"></i> Pushback Seats</div>
+                        <div class="feature-item"><i class="fas fa-music"></i> Music System</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Routes Section -->
+    <section id="routes" class="section-padding">
+        <div class="container">
+            <div class="text-center">
+                <span class="section-subtitle">Popular Destinations</span>
+                <h2 class="section-title">We Serve You Best</h2>
+                <p style="color:var(--text-light);">Specialized outstation rides to major religious and tourist hubs.</p>
+            </div>
+
+            <div class="routes-grid">
+                <!-- Route 1 -->
+                <div class="route-card">
+                    <div class="route-img">
+                        <img src="https://picsum.photos/seed/ayodhya/400/300" alt="Ayodhya Temple">
+                    </div>
+                    <div class="route-info">
+                        <h3>Ayodhya Dham</h3>
+                        <p>Visit the holy Ram Janmabhoomi temple with a comfortable ride.</p>
+                        <div class="route-meta">
+                            <span><i class="fas fa-road"></i> Round Trip</span>
+                            <span><i class="fas fa-tag"></i> Best Rates</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Route 2 -->
+                <div class="route-card">
+                    <div class="route-img">
+                        <img src="https://picsum.photos/seed/gorakhpur/400/300" alt="Gorakhpur City">
+                    </div>
+                    <div class="route-info">
+                        <h3>Gorakhpur</h3>
+                        <p>Direct rides to Gorakhpur railway station or Gorakhnath Temple.</p>
+                        <div class="route-meta">
+                            <span><i class="fas fa-road"></i> One Way</span>
+                            <span><i class="fas fa-clock"></i> 24/7 Service</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Route 3 -->
+                <div class="route-card">
+                    <div class="route-img">
+                        <img src="https://picsum.photos/seed/varanasi/400/300" alt="Varanasi Ghat">
+                    </div>
+                    <div class="route-info">
+                        <h3>Varanasi / Prayagraj</h3>
+                        <p>Spiritual journeys to Kashi Vishwanath and Sangam.</p>
+                        <div class="route-meta">
+                            <span><i class="fas fa-road"></i> Outstation</span>
+                            <span><i class="fas fa-suitcase-rolling"></i> Family Friendly</span>
+                        </div>
+                    </div>
+                </div>
+                
+                 <!-- Route 4 -->
+                 <div class="route-card">
+                    <div class="route-img">
+                        <img src="https://picsum.photos/seed/lucknow/400/300" alt="Lucknow City">
+                    </div>
+                    <div class="route-info">
+                        <h3>Lucknow</h3>
+                        <p>Comfortable travel to the City of Nawabs for shopping or business.</p>
+                        <div class="route-meta">
+                            <span><i class="fas fa-road"></i> Drop/Pickup</span>
+                            <span><i class="fas fa-shield-alt"></i> Safe Travel</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Section -->
+    <section id="booking" class="section-padding booking-section">
+        <div class="container">
+            <div class="text-center" style="margin-bottom: 2rem;">
+                <h2 class="section-title">Book Your Ride</h2>
+                <p>Fill the form below to check availability or get a quote.</p>
+            </div>
+
+            <div class="booking-container">
+                <form id="taxiForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" placeholder="Enter full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" placeholder="e.g. 98765xxxxx" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pickup">Pickup Location</label>
+                            <input type="text" id="pickup" placeholder="City or Address" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="drop">Destination</label>
+                            <input type="text" id="drop" placeholder="e.g. Ayodhya" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Travel Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="type">Trip Type</label>
+                            <select id="type">
+                                <option value="one-way">One Way</option>
+                                <option value="round-trip">Round Trip</option>
+                            </select>
+                        </div>
+                        <div class="full-width form-group">
+                            <button type="submit" class="btn" style="width: 100%; border-radius: var(--radius);">Request Booking</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-logo">Janmejay Ventures</div>
+            <p>Your Trusted Travel Partner</p>
+            
+            <div class="contact-info">
+                <div><i class="fas fa-car"></i> White Ertiga VXI (7 Seater)</div>
+                <div><i class="fas fa-map-marker-alt"></i> Based in Uttar Pradesh</div>
+                <!-- Placeholder phone number -->
+                <div><i class="fas fa-phone"></i> +91 98765 43210</div>
+            </div>
+
+            <a href="https://wa.me/919876543210" target="_blank" class="whatsapp-btn">
+                <i class="fab fa-whatsapp" style="font-size: 1.2rem;"></i> Chat on WhatsApp
+            </a>
+
+            <div style="margin-top: 2rem; font-size: 0.8rem; border-top: 1px solid #374151; padding-top: 1rem;">
+                &copy; 2023 Janmejay Ventures. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success Message Toast -->
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span>Booking Request Sent! We will call you shortly.</span>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Simple Form Handling
+        document.getElementById('taxiForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get values (In a real backend, you'd send these to a server)
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const drop = document.getElementById('drop').value;
+
+            // Show success message
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+
+            // Clear form
+            this.reset();
+
+            // Hide toast after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+
+            // Optional: Open WhatsApp with pre-filled message
+            // This is very useful for small taxi businesses
+            const whatsappMsg = `Hello Janmejay Ventures, I want to book a taxi. Name: ${name}, Drop: ${drop}, Phone: ${phone}`;
+            // const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(whatsappMsg)}`;
+            // window.open(whatsappUrl, '_blank');
+        });
+    </script>
+</body>
+</html>
