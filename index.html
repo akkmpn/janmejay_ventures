@@ -522,12 +522,12 @@
         </div>
     </section>
 
-     <!-- Booking Section (UPDATED) -->
+    <!-- Booking Section -->
     <section id="booking" class="section-padding booking-section">
         <div class="container">
             <div class="text-center" style="margin-bottom: 2rem;">
                 <h2 class="section-title">Book Your Ride</h2>
-                <p>Fill form below. <b>Select pickup & destination using the maps!</b></p>
+                <p>Fill the form below to check availability or get a quote.</p>
             </div>
 
             <div class="booking-container">
@@ -541,48 +541,14 @@
                             <label for="phone">Phone Number</label>
                             <input type="tel" id="phone" placeholder="e.g. 98765xxxxx" required>
                         </div>
-                        
-                        <!-- ✅ FIXED PICKUP SECTION -->
-                        <div class="form-group" style="grid-column: span 2;">
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <!-- 🏍️ LABEL -->
-                                <label style="font-weight: 600;">Pickup Location</label>
-                                <!-- 🗺️ MAP -->
-                                <div style="display: flex; gap: 10px;">
-                                    <div id="pickupMap" class="map-container"></div>
-                                    <div class="map-controls">
-                                        <!-- GPS Button -->
-                                        <button type="button" onclick="getCurrentLocation()" class="location-btn">
-                                            <i class="fas fa-location-arrow" style="font-size: 1rem;"></i> Use GPS
-                                        </button>
-                                        <small>Click map to set address</small>
-                                    </div>
-                                </div>
-                                
-                                <!-- Hidden Input -->
-                                <input type="text" id="pickup" list="citySuggestions" placeholder="City or Address" required>
-                                <!-- ✅ FIXED HEIGHT: Map Box is 350px tall to prevent squishing -->
-                                <div id="pickupMap" style="height: 350px; margin-top: 10px;"></div>
+                        <div class="form-group">
+                            <label for="pickup">Pickup Location</label>
+                            <input type="text" id="pickup" placeholder="City or Address" required>
                         </div>
-                        
-                        <!-- ✅ FIXED DESTINATION SECTION -->
-                        <div class="form-group" style="grid-column: span 2;">
-                            <div style="display: flex; flex-direction: column; gap: 5px;">
-                                <!-- 🍒️ LABEL -->
-                                <label style="font-weight: 600;">Destination</label>
-                                <!-- 🔍 SEARCH -->
-                                <div style="display: flex; gap: 10px;">
-                                    <input type="text" id="dropSearch" placeholder="Search (e.g. Ayodhya)..." onkeypress="if(event.key === 'Enter') searchDropMap()" style="flex-grow: 1; padding: 6px;">
-                                            <button type="button" onclick="searchDropMap()" class="location-btn" style="padding: 6px 12px; background-color: #fff; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">🔍 Search</button>
-                                        <small>Click map to select location</small>
-                                </div>
-                                
-                                <!-- ✅ FIXED HEIGHT: Map Box is 350px tall -->
-                                <div id="dropMap" class="map-container"></div>
-                            </div>
+                        <div class="form-group">
+                            <label for="drop">Destination</label>
+                            <input type="text" id="drop" placeholder="e.g. Ayodhya" required>
                         </div>
-
-                        <!-- Date & Type -->
                         <div class="form-group">
                             <label for="date">Travel Date</label>
                             <input type="date" id="date" required>
@@ -595,7 +561,7 @@
                             </select>
                         </div>
                         
-                        <!-- ✅ FIXED RADIO BUTTONS ADDED HERE -->
+                        <!-- ✅ RADIO BUTTONS ADDED HERE -->
                         <div class="full-width form-group">
                             <label>Preferred Contact Method</label>
                             <div style="display: flex; gap: 20px; margin-top: 5px;">
@@ -649,192 +615,62 @@
     </div>
 
     <!-- Scripts -->
-    <script>
-        // --- 1. STATE MANAGEMENT ---
-        let pickupMap, dropMap;
+       <script>
+        document.getElementById('taxiForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 1. Get Form Values
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const pickup = document.getElementById('pickup').value;
+            const drop = document.getElementById('drop').value;
+            const date = document.getElementById('date').value;
+            const type = document.getElementById('type').value;
+            
+            // 2. Get Contact Preference
+            const contactMethod = document.querySelector('input[name="contactMethod"]:checked').value;
 
-        // Initialize Maps when page loads
-        window.onload = function() {
-            // Default Center (Ayodhya/Gorakhpur Area)
-            const defaultLat = 26.7951;
-            const defaultLng = 82.1924;
+            // 3. Create Base Message
+            const baseMessage = `New Booking Request (Janmejay Ventures)\n` +
+                            `-----------------------\n` +
+                            `Name: ${name}\n` +
+                            `Phone: ${phone}\n` +
+                            `Pickup: ${pickup}\n` +
+                            `Drop: ${drop}\n` +
+                            `Date: ${date}\n` +
+                            `Type: ${type}`;
 
-            // 1. Init Pickup Map
-            try {
-                // Try to remove old layer if it exists (clean slate)
-                if (pickupMap.hasLayer('searchLayer')) {
-                    pickupMap.removeLayer('searchLayer'); 
-                }
+            // 4. Send based on choice
+            if (contactMethod === 'whatsapp') {
+                // WHATSAPP: Works normally
+                const encodedMessage = encodeURIComponent(baseMessage).replace(/%0A/g, '%0A'); 
+                const whatsappUrl = `https://wa.me/918009136859?text=${encodedMessage}`;
+                window.open(whatsappUrl, '_blank');
+            } else {
+                // EMAIL: Use 'Simulate Click' Method for Telegram/In-built browsers
+                const subject = encodeURIComponent("New Taxi Booking Request");
+                const body = encodeURIComponent(baseMessage);
                 
-                pickupMap = L.map('pickupMap').setView([defaultLat, defaultLng], 14);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickupMap);
-                pickupMarker = L.marker([defaultLat, defaultLng]).addTo(pickupMap);
-            } catch (e) {
-                console.error("Pickup Map Init Error:", e);
-                alert("Maps failed to load. Refresh page.");
+                // We use ?to= explicitly to try and force the email address
+                const mailtoLink = `mailto:?to=janmejaip@gmail.com&subject=${subject}&body=${body}`;
+                
+                // Create a temporary link element
+                const a = document.createElement('a');
+                a.href = mailtoLink;
+                
+                // Add to body (required for some browsers to register element)
+                document.body.appendChild(a);
+                
+                // Simulate a mouse click
+                a.click();
+                
+                // Remove element
+                document.body.removeChild(a);
             }
 
-            // 2. Init Destination Map
-            try {
-                // Try to remove old layer
-                if (dropMap.hasLayer('searchLayer')) {
-                    dropMap.removeLayer('searchLayer');
-                }
-
-                dropMap = L.map('dropMap').setView([defaultLat, defaultLng], 14);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(dropMap);
-                dropMarker = L.marker([defaultLat, defaultLng]).addTo(dropMap);
-            } catch (e) {
-                console.error("Drop Map Init Error:", e);
-                alert("Maps failed to load. Refresh page.");
-            }
-        };
-
-        // --- 2. GEOLOCATION ---
-        function getCurrentLocation() {
-            const pickupInput = document.getElementById('pickup');
-            
-            if (!navigator.geolocation) {
-                alert("Geolocation is not supported by this browser.");
-                return;
-            }
-
-            // Show loading text
-            pickupInput.value = "Detecting..."; // ✅ FIXED LOADING STATE
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude.toFixed(4);
-                    const lng = position.coords.longitude.toFixed(4);
-                    
-                    // 💡 User Friendly Text (Coordinates)
-                    pickupInput.value = "Current GPS Location (Coords: " + lat + ", " + lng + ") - Click to Edit";
-                    
-                    // 🚢 Visual Feedback (Green Border)
-                    pickupInput.style.borderColor = "#10B981"; 
-
-                    // ✅ FLY TO USER LOCATION (Moves Map)
-                    pickupMap.flyTo([lat, lng], 14);
-                    
-                    // Add "My Location" Marker
-                    if (pickupMarker) pickupMap.removeLayer(pickupMarker);
-                    pickupMarker = L.marker([lat, lng]).addTo(pickupMap);
-                },
-                (error) => {
-                    console.error("Geolocation error:", error);
-                    
-                    // 📵 USER FRIENDLY ALERT
-                    alert("Error detecting location: " + error.message + ". \n\nPlease type your address manually.");
-                    
-                    // 📵 ERROR STATE
-                    pickupInput.value = "Error detecting location.";
-                    pickupInput.style.borderColor = "#ef4444"; // Red border
-                }
-            );
-        }
-
-        // --- 3. SEARCH FUNCTIONS (Google Maps Style) ---
-        function searchPickupMap() {
-            const query = document.getElementById('pickupSearch').value;
-            const mapBox = document.querySelector('.map-container'); // Note: This will look for the box *inside* the active form area
-
-            if (!query) {
-                // If mapBox exists (Destination section is open), show error
-                if (mapBox) mapBox.innerHTML = "Please enter a city name.";
-                return;
-            }
-
-            // Visual feedback inside map container (Destination)
-            if (mapBox) mapBox.innerHTML = "Loading...";
-
-            // Use OpenCage (Free Geocoding - Nominatim)
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
-                .then(response => response.json())
-                    .then(data => {
-                        if (data.length > 0) {
-                            const { lat, lon, display_name, display_place } = data[0];
-
-                            // Fly Map
-                            dropMap.flyTo([lat, lon], 14);
-                            
-                            // 💡 User Friendly Text
-                            const text = display_name + (display_place ? `, ` + display_place : ``);
-                            document.getElementById('pickup').value = text;
-                            
-                            // ✅ Visual Feedback (Green Border)
-                            document.getElementById('pickup').style.borderColor = "#10B981";
-                        }
-                    } else {
-                        // City Not Found Message
-                        if(mapBox) mapBox.innerHTML = "City not found.";
-                    }
-                })
-                .catch(error => {
-                    console.error("Search error:", error);
-                    if(mapBox) mapBox.innerHTML = "Error loading map.";
-                });
-        }
-
-        // --- 4. MANUAL ENTRY (URL & Coords) ---
-        function setMapUrl(type) {
-            const input = document.getElementById(type + 'Url');
-            const inputField = document.getElementById(type + 'Coords');
-            const map = type === 'pickup' ? pickupMap : dropMap;
-
-            const url = input.value.trim();
-            
-            // Validate URL (Basic check)
-            if (!url) {
-                if (type === 'pickup') {
-                    alert("Please enter a valid URL.");
-                    return;
-            }
-
-            if (url.startsWith('http')) {
-                // Open Google Maps in new tab
-                window.open(url, '_blank');
-                // Fallback: Update text input just in case
-                inputField.value = "Open Google Maps (See New Tab)";
-            } else {
-                alert("Please include http:// or https://www.google.com/maps/place/..." to view map.");
-            }
-        }
-
-        function setCoords(type) {
-            const input = document.getElementById(type + 'Coords');
-            const map = type === 'pickup' ? pickupMap : dropMap;
-
-            const coordsStr = input.value.trim();
-            const parts = coordsStr.split(',');
-            
-            if (parts.length !== 2) {
-                alert("Format: Latitude, Longitude (e.g., 26.79, 83.37)");
-                return;
-            }
-
-            const lat = parseFloat(parts[0]);
-            const lng = parseFloat(parts[1]);
-
-            if (isNaN(lat) || isNaN(lng)) {
-                alert("Invalid coordinates.");
-                return;
-            }
-
-            // Fly Map
-            map.flyTo([lat, lng], 14);
-            
-            // Update Input Field
-            inputField.value = "Used Custom Coords";
-        }
-
-        function toggleOptions() {
-            const el = document.getElementById('advancedOptions');
-            if (el.style.display === 'none') {
-                el.style.display = 'grid';
-            } else {
-                el.style.display = 'none';
-            }
-        }
+            // 5. Clear form
+            this.reset();
+        });
     </script>
 </body>
 </html>
