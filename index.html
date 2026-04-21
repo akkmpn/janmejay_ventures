@@ -611,7 +611,7 @@
         <span>Booking Request Sent! We will call you shortly.</span>
     </div>
 
-              <script>
+                    <script>
         document.getElementById('taxiForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -628,9 +628,9 @@
 
             // 3. Define Owner Details
             const ownerPhoneNumber = "917596993070"; 
-            const ownerEmail = "janmejaip@gmail.com"; // FATHER'S EMAIL
-
+            
             // 4. Create Message Text
+            // We add "Please send to janmejaip@gmail.com" at the bottom as a backup
             const messageText = `New Booking Request (Janmejay Ventures)\n` +
                             `-----------------------\n` +
                             `Name: ${name}\n` +
@@ -638,20 +638,24 @@
                             `Pickup: ${pickup}\n` +
                             `Drop: ${drop}\n` +
                             `Date: ${date}\n` +
-                            `Type: ${type}`;
+                            `Type: ${type}\n` +
+                            `\n(Please send this email to janmejaip@gmail.com)`;
 
             // 5. Send based on choice
             if (contactMethod === 'whatsapp') {
+                // Encode for URL
                 const encodedMessage = encodeURIComponent(messageText).replace(/%0A/g, '%0A'); 
                 const whatsappUrl = `https://wa.me/${ownerPhoneNumber}?text=${encodedMessage}`;
                 window.open(whatsappUrl, '_blank');
             } else {
-                // Send via Email (Hardcoded to fix issues)
+                // Send via Email using window.open (Forces System Mail App)
                 const subject = encodeURIComponent("New Taxi Booking Request");
                 const body = encodeURIComponent(messageText);
-                // 👇 EMAIL IS WRITTEN DIRECTLY HERE 👇
-                window.location.href = "mailto:janmejaip@gmail.com?subject=" + subject + "&body=" + body;
+                
+                // 👇 CHANGE: We use window.open with specific mailto link
+                window.open("mailto:janmejaip@gmail.com?subject=" + subject + "&body=" + body, "_self");
             }
+
             // 6. Clear form
             this.reset();
         });
