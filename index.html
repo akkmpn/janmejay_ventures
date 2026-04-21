@@ -646,11 +646,12 @@
                 const whatsappUrl = `https://wa.me/${ownerPhoneNumber}?text=${encodedMessage}`;
                 window.open(whatsappUrl, '_blank');
             } else {
+                // Send via Email (Hardcoded to fix issues)
                 const subject = encodeURIComponent("New Taxi Booking Request");
                 const body = encodeURIComponent(messageText);
-                window.location.href = `mailto:${ownerEmail}?subject=${subject}&body=${body}`;
+                // 👇 EMAIL IS WRITTEN DIRECTLY HERE 👇
+                window.location.href = "mailto:janmejaip@gmail.com?subject=" + subject + "&body=" + body;
             }
-
             // 6. Clear form
             this.reset();
         });
