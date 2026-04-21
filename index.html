@@ -611,8 +611,8 @@
             // 2. Get Contact Preference (WhatsApp or Email)
             const contactMethod = document.querySelector('input[name="contactMethod"]:checked').value;
 
-            // 3. Create Message Text
-            // 👇 YOUR NEW TEXT IS HERE 👇
+            // 3. Create Message Text (Same for both)
+            // 👇 YOUR REQUESTED TEXT IS ADDED AT BOTTOM 👇
             const messageText = `New Booking Request (Janmejay Ventures)\n` +
                             `-----------------------\n` +
                             `Name: ${name}\n` +
@@ -634,7 +634,7 @@
                 const subject = encodeURIComponent("New Taxi Booking Request");
                 const body = encodeURIComponent(messageText);
                 
-                // 👇 OPENS EMAIL APP DIRECTLY 👇
+                // Opens Email App
                 window.open("mailto:janmejaip@gmail.com?subject=" + subject + "&body=" + body, "_self");
             }
 
