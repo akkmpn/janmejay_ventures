@@ -593,39 +593,50 @@
         <span>Booking Request Sent! We will call you shortly.</span>
     </div>
 
-    <script>
-        // Booking Form Handler with WhatsApp
+       <script>
         document.getElementById('taxiForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Get values from the form
+            // 1. Get Form Values
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
             const pickup = document.getElementById('pickup').value;
             const drop = document.getElementById('drop').value;
             const date = document.getElementById('date').value;
             const type = document.getElementById('type').value;
-
-            // ⚠️ IMPORTANT: CHANGE THIS NUMBER TO YOUR FATHER'S WHATSAPP NUMBER
-            // Format: Country Code + Number (No spaces or dashes)
-            // Example: 91 for India, then 10 digit number.
-            const ownerPhoneNumber = "917596993070"; 
-
-            // Create the message
-            const message = `*New Booking Request (Janmejay Ventures)*%0A` +
-                            `-----------------------%0A` +
-                            `👤 *Name:* ${name}%0A` +
-                            `📞 *Phone:* ${phone}%0A` +
-                            `📍 *Pickup:* ${pickup}%0A` +
-                            `🏁 *Drop:* ${drop}%0A` +
-                            `📅 *Date:* ${date}%0A` +
-                            `🚕 *Type:* ${type}`;
-
-            // Redirect to WhatsApp
-            const whatsappUrl = `https://wa.me/${ownerPhoneNumber}?text=${message}`;
-            window.open(whatsappUrl, '_blank');
             
-            // Clear form
+            // 2. Get Contact Preference (WhatsApp or Email)
+            const contactMethod = document.querySelector('input[name="contactMethod"]:checked').value;
+
+            // 3. Define Owner Details
+            // (Using your email for testing)
+            const ownerPhoneNumber = "917596993070"; 
+            const ownerEmail = "akkmpn@gmail.com";
+
+            // 4. Create Message Text
+            const messageText = `New Booking Request (Janmejay Ventures)\n` +
+                            `-----------------------\n` +
+                            `Name: ${name}\n` +
+                            `Phone: ${phone}\n` +
+                            `Pickup: ${pickup}\n` +
+                            `Drop: ${drop}\n` +
+                            `Date: ${date}\n` +
+                            `Type: ${type}`;
+
+            // 5. Send based on choice
+            if (contactMethod === 'whatsapp') {
+                // Encode for URL
+                const encodedMessage = encodeURIComponent(messageText).replace(/%0A/g, '%0A'); 
+                const whatsappUrl = `https://wa.me/${ownerPhoneNumber}?text=${encodedMessage}`;
+                window.open(whatsappUrl, '_blank');
+            } else {
+                // Send via Email
+                const subject = encodeURIComponent("New Taxi Booking Request");
+                const body = encodeURIComponent(messageText);
+                window.location.href = `mailto:${ownerEmail}?subject=${subject}&body=${body}`;
+            }
+
+            // 6. Clear form
             this.reset();
         });
     </script>
