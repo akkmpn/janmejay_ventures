@@ -625,30 +625,30 @@
             const date = document.getElementById('date').value;
             const type = document.getElementById('type').value;
             
-            // 2. Get Contact Preference (WhatsApp or Email)
+            // 2. Get Contact Preference
             const contactMethod = document.querySelector('input[name="contactMethod"]:checked').value;
 
-            // 3. Create Message Text (Your Custom Text)
-            const messageText = `New Booking Request (Janmejay Ventures)\n` +
+            // 3. Create Base Message (Clean - No Extra Text)
+            const baseMessage = `New Booking Request (Janmejay Ventures)\n` +
                             `-----------------------\n` +
                             `Name: ${name}\n` +
                             `Phone: ${phone}\n` +
                             `Pickup: ${pickup}\n` +
                             `Drop: ${drop}\n` +
                             `Date: ${date}\n` +
-                            `Type: ${type}\n` +
-                            `\n(Contact this mail for further queries or book)`;
+                            `Type: ${type}`;
 
             // 4. Send based on choice
             if (contactMethod === 'whatsapp') {
-                // Send via WhatsApp
-                const encodedMessage = encodeURIComponent(messageText).replace(/%0A/g, '%0A'); 
+                // 👇 WHATSAPP: Uses ONLY Clean Message 👇
+                const encodedMessage = encodeURIComponent(baseMessage).replace(/%0A/g, '%0A'); 
                 const whatsappUrl = `https://wa.me/918009136859?text=${encodedMessage}`;
                 window.open(whatsappUrl, '_blank');
             } else {
-                // Send via Email (Hardcoded to fix Telegram issue)
+                // 👇 EMAIL: Adds Extra Line at Bottom 👇
+                const emailBody = baseMessage + "\n\n(Contact this mail for further queries or book)";
                 const subject = encodeURIComponent("New Taxi Booking Request");
-                const body = encodeURIComponent(messageText);
+                const body = encodeURIComponent(emailBody);
                 
                 // Opens Email App directly
                 window.open("mailto:janmejaip@gmail.com?subject=" + subject + "&body=" + body, "_self");
