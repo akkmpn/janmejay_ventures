@@ -596,33 +596,50 @@
     </div>
 
     <!-- Scripts -->
-    <script>
-        // Simple Form Handling
+       <script>
         document.getElementById('taxiForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Get values (In a real backend, you'd send these to a server)
+            // 1. Get Form Values
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
+            const pickup = document.getElementById('pickup').value;
             const drop = document.getElementById('drop').value;
+            const date = document.getElementById('date').value;
+            const type = document.getElementById('type').value;
+            
+            // 2. Get Contact Preference (WhatsApp or Email)
+            const contactMethod = document.querySelector('input[name="contactMethod"]:checked').value;
 
-            // Show success message
-            const toast = document.getElementById('toast');
-            toast.classList.add('show');
+            // 3. Create Message Text
+            // 👇 YOUR NEW TEXT IS HERE 👇
+            const messageText = `New Booking Request (Janmejay Ventures)\n` +
+                            `-----------------------\n` +
+                            `Name: ${name}\n` +
+                            `Phone: ${phone}\n` +
+                            `Pickup: ${pickup}\n` +
+                            `Drop: ${drop}\n` +
+                            `Date: ${date}\n` +
+                            `Type: ${type}\n` +
+                            `\n(Contact this mail for further queries or book)`;
 
-            // Clear form
+            // 4. Send based on choice
+            if (contactMethod === 'whatsapp') {
+                // Send via WhatsApp
+                const encodedMessage = encodeURIComponent(messageText).replace(/%0A/g, '%0A'); 
+                const whatsappUrl = `https://wa.me/918009136859?text=${encodedMessage}`;
+                window.open(whatsappUrl, '_blank');
+            } else {
+                // Send via Email (Hardcoded to fix Telegram issue)
+                const subject = encodeURIComponent("New Taxi Booking Request");
+                const body = encodeURIComponent(messageText);
+                
+                // 👇 OPENS EMAIL APP DIRECTLY 👇
+                window.open("mailto:janmejaip@gmail.com?subject=" + subject + "&body=" + body, "_self");
+            }
+
+            // 5. Clear form
             this.reset();
-
-            // Hide toast after 3 seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 4000);
-
-            // Optional: Open WhatsApp with pre-filled message
-            // This is very useful for small taxi businesses
-            const whatsappMsg = `Hello Janmejay Ventures, I want to book a taxi. Name: ${name}, Drop: ${drop}, Phone: ${phone}`;
-            const whatsappUrl = `https://wa.me/918009136859?text=${encodeURIComponent(whatsappMsg)}`;
-            window.open(whatsappUrl, '_blank');
         });
     </script>
 </body>
