@@ -630,7 +630,7 @@
             // 2. Get Contact Preference
             const contactMethod = document.querySelector('input[name="contactMethod"]:checked').value;
 
-            // 3. Create Base Message
+            // 3. Create Message
             const baseMessage = `New Booking Request (Janmejay Ventures)\n` +
                             `-----------------------\n` +
                             `Name: ${name}\n` +
@@ -642,35 +642,47 @@
 
             // 4. Send based on choice
             if (contactMethod === 'whatsapp') {
-                // WHATSAPP: Works normally
+                // WHATSAPP
                 const encodedMessage = encodeURIComponent(baseMessage).replace(/%0A/g, '%0A'); 
                 const whatsappUrl = `https://wa.me/918009136859?text=${encodedMessage}`;
                 window.open(whatsappUrl, '_blank');
             } else {
-                // EMAIL: Use 'Simulate Click' Method for Telegram/In-built browsers
+                // EMAIL
+                const emailBody = baseMessage + "\n\n(Contact this mail for further queries or book)";
                 const subject = encodeURIComponent("New Taxi Booking Request");
-                const body = encodeURIComponent(baseMessage);
-                
-                // We use ?to= explicitly to try and force the email address
-                const mailtoLink = `mailto:?to=janmejaip@gmail.com&subject=${subject}&body=${body}`;
-                
-                // Create a temporary link element
-                const a = document.createElement('a');
-                a.href = mailtoLink;
-                
-                // Add to body (required for some browsers to register element)
-                document.body.appendChild(a);
-                
-                // Simulate a mouse click
-                a.click();
-                
-                // Remove element
-                document.body.removeChild(a);
+                const body = encodeURIComponent(emailBody);
+                window.open("mailto:janmejaip@gmail.com?subject=" + subject + "&body=" + body, "_self");
             }
 
             // 5. Clear form
             this.reset();
         });
+
+        // 🗺️ NEW: Function to Get User's Location
+        function getLocation() {
+            const pickupInput = document.getElementById('pickup');
+            
+            if (navigator.geolocation) {
+                // Show user something is happening
+                pickupInput.value = "Detecting location...";
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        // SUCCESS: Fills input with "Current GPS Location" 
+                        // (We don't show raw coordinates like "26.45, 81.23" because user prefers text)
+                        pickupInput.value = "Current GPS Location (Click to Edit)";
+                    },
+                    (error) => {
+                        // ERROR: Fills input with error or asks user to type
+                        console.error("Geolocation error:", error);
+                        pickupInput.value = "Could not detect location. Please type manually.";
+                    }
+                );
+            } else {
+                // If browser doesn't support Geolocation
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
     </script>
 </body>
 </html>
