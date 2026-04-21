@@ -394,52 +394,21 @@
             transform: translateY(0);
             opacity: 1;
         }
-                /* --- MAP STYLES --- */
-        .map-wrapper {
+        /* --- MAP STYLES --- */
+        .map-container {
             border: 1px solid #e5e7eb;
             border-radius: var(--radius);
-            overflow: hidden;
-            height: 250px;
+            height: 300px;
+            width: 100%;
+            margin-top: 10px;
             position: relative;
+            z-index: 1;
         }
 
         .map-box {
             height: 100%;
             width: 100%;
             z-index: 1;
-        }
-
-        .map-controls {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            left: 10px;
-            z-index: 2;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 5px 10px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .map-controls small {
-            color: #1f2937;
-            font-size: 0.8rem;
-        }
-
-        .location-btn {
-            background-color: var(--primary-dark);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .location-btn:hover {
-            background-color: var(--primary-color);
         }
     </style>
 </head>
@@ -571,12 +540,12 @@
         </div>
     </section>
 
-        <!-- Booking Section -->
+         <!-- Booking Section -->
     <section id="booking" class="section-padding booking-section">
         <div class="container">
             <div class="text-center" style="margin-bottom: 2rem;">
                 <h2 class="section-title">Book Your Ride</h2>
-                <p>Fill form below. <b>Search map to select pickup/destination!</b></p>
+                <p>Fill form below. <b>Use maps for pickup & destination!</b></p>
             </div>
 
             <div class="booking-container">
@@ -592,36 +561,76 @@
                             <input type="tel" id="phone" placeholder="e.g. 98765xxxxx" required>
                         </div>
                         
-                        <!-- 🗺️ PICKUP LOCATION (WITH MAP) -->
-                        <div class="form-group" style="grid-column: span 2;">
-                            <label>Pickup Location</label>
-                            <!-- Hidden input to store the text value -->
-                            <input type="text" id="pickup" placeholder="Select on Map" required readonly style="background-color: #e5e7eb; cursor: pointer;">
+                        <!-- PICKUP & DESTINATION MAPS -->
+                        <div class="form-group" style="grid-column: span 2; background: #f0fdf4; padding: 15px; border-radius: var(--radius); border: 1px dashed #ccc;">
+                            <label style="display:block; margin-bottom: 5px; font-weight:bold;">Search Map & Select Location</label>
                             
-                            <!-- 🗺️ MAP CONTAINER -->
-                            <div class="map-wrapper">
-                                <div id="pickupMap" class="map-box"></div>
-                                <div class="map-controls">
-                                    <button type="button" onclick="setCurrentLocation()" class="location-btn">
-                                        <i class="fas fa-crosshairs"></i> Use GPS
-                                    </button>
-                                    <small>Click map to set address</small>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <!-- Pickup -->
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <label>Pickup</label>
+                                        <div style="flex; gap: 5px;">
+                                            <!-- GPS Button -->
+                                            <button type="button" onclick="getCurrentLocation()" style="padding: 6px 12px; background: var(--primary-dark); color: white; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0;">
+                                                <i class="fas fa-location-arrow"></i> GPS
+                                            </button>
+                                            <!-- Search Input -->
+                                            <input type="text" id="pickupSearch" placeholder="Search (e.g. Ayodhya)..." onkeypress="if(event.key === 'Enter') searchPickupMap()" style="flex-grow: 1; padding: 6px;">
+                                            <!-- Search Button -->
+                                            <button type="button" onclick="searchPickupMap()" style="padding: 6px 12px; background: #fff; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">🔍</button>
+                                        </div>
+                                    </div>
+                                    <!-- Hidden Map Container -->
+                                    <div id="pickupMap" class="map-container"></div>
+                                    
+                                    <!-- Hidden Input for form submission -->
+                                    <input type="text" id="pickup" list="citySuggestions" readonly required style="background-color: #e5e7eb; cursor: text; margin-top: 5px;">
+                                </div>
+                                </div>
+
+                                <!-- Destination -->
+                                <div style="display: flex; flex-direction: column; gap: 5px;">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <label>Destination</label>
+                                        <div style="flex; gap: 5px;">
+                                            <!-- Search Input -->
+                                            <input type="text" id="dropSearch" placeholder="Search (e.g. Lucknow)..." onkeypress="if(event.key === 'Enter') searchDropMap()" style="flex-grow: 1; padding: 6px;">
+                                            <button type="button" onclick="searchDropMap()" style="padding: 6px 12px; background: #fff; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">🔍</button>
+                                        </div>
+                                    </div>
+                                    <!-- Hidden Map Container -->
+                                    <div id="dropMap" class="map-container"></div>
+                                    
+                                    <!-- Hidden Input for form submission -->
+                                    <input type="text" id="drop" list="citySuggestions" required readonly style="background-color: #e5e7eb; cursor: text; margin-top: 5px;">
+                                </div>
+                                
+                                <!-- Advanced Options Toggle -->
+                                <div style="text-align: right; margin-top: 5px;">
+                                    <a href="javascript:void(0)" onclick="toggleOptions()" style="font-size: 0.8rem; text-decoration: underline; color: #1f2937;">Advanced Options</a>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- 🗺️ DESTINATION (WITH MAP) -->
-                        <div class="form-group" style="grid-column: span 2;">
-                            <label>Destination</label>
-                            <input type="text" id="drop" placeholder="Select on Map" required readonly style="background-color: #e5e7eb; cursor: pointer;">
 
-                            <!-- 🗺️ MAP CONTAINER -->
-                            <div class="map-wrapper">
-                                <div id="dropMap" class="map-box"></div>
-                                <div class="map-controls">
-                                    <small>Search city (e.g. "Ayodhya") and click map to select</small>
-                                </div>
+                        <!-- Advanced Options Panel (Hidden by default) -->
+                        <div id="advancedOptions" style="display: none; grid-column: span 2; gap: 10px; background: #f3f4f6; padding: 15px; border-radius: var(--radius);">
+                            <h4 style="margin: 0 0 10px 0;">Advanced Options</h4>
+                            <p style="font-size: 0.9rem; margin-bottom: 10px;">Or paste Google Maps URL:</p>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="pickupUrl" placeholder="e.g. https://www.google.com/maps/place/..." style="width: 100%; padding: 8px;">
+                                <button type="button" onclick="setMapUrl('pickup')" style="background: #10B981; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Go to URL</button>
                             </div>
+                            
+                            <hr style="margin: 10px 0; border-color: #e5e7eb;">
+                            
+                            <p style="font-size: 0.9rem; margin-bottom: 10px;">Or enter Coordinates:</p>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="pickupCoords" placeholder="e.g. 26.7951, 80.1924" style="width: 100%; padding: 8px;">
+                                <button type="button" onclick="setCoords('pickup')" style="background: #10B981; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Go to Coords</button>
+                            </div>
+                            
+                            <button type="button" onclick="toggleOptions()" style="align-self: flex-start; padding: 5px 10px; background: none; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">Close</button>
                         </div>
 
                         <!-- Date & Type -->
@@ -692,10 +701,220 @@
 
     <!-- Scripts -->
     <script>
+        // --- 1. STATE MANAGEMENT ---
+        let pickupMap, dropMap;
+        let pickupMarker, dropMarker;
+        let pickupUrl = "";
+        let dropUrl = "";
+        
+        // --- 2. MAP INITIALIZATION ---
+        window.onload = function() {
+            // Default Center (Gorakhpur Area)
+            const defaultLat = 26.7951;
+            const defaultLng = 83.3760;
+
+            // Init Pickup Map
+            try {
+                pickupMap = L.map('pickupMap').setView([defaultLat, defaultLng], 14);
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickupMap);
+                pickupMarker = L.marker([defaultLat, defaultLng]).addTo(pickupMap);
+            } catch (e) {
+                console.error("Pickup Map Init Error:", e);
+            }
+            
+            // Init Destination Map
+            try {
+                dropMap = L.map('dropMap').setView([defaultLat, defaultLng], 14);
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(dropMap);
+                dropMarker = L.marker([defaultLat, defaultLng]).addTo(dropMap);
+            } catch (e) {
+                console.error("Drop Map Init Error:", e);
+            }
+        };
+
+        // --- 3. GEOLOCATION ---
+        function getCurrentLocation() {
+            const pickupInput = document.getElementById('pickup');
+            const mapBox = document.querySelector('input[name="contactMethod"]:checked').value === 'whatsapp' ? document.querySelector('.map-container') : null;
+
+            if (navigator.geolocation) {
+                // Visual feedback inside map container if visible
+                if(mapBox) mapBox.innerHTML = "Locating...";
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude.toFixed(4);
+                        const lng = position.coords.longitude.toFixed(4);
+                        
+                        // Fly Map to User
+                        pickupMap.flyTo([lat, lng], 14);
+                        
+                        // Update UI
+                        pickupInput.value = "Current GPS Location (Click map to edit)";
+                        pickupInput.style.borderColor = "#10B981";
+                        
+                        // Add "My Location" Marker
+                        if (pickupMarker) pickupMap.removeLayer(pickupMarker);
+                        pickupMarker = L.marker([lat, lng]).addTo(pickupMap);
+                    },
+                    (error) => {
+                        console.error("Geoolocation error:", error);
+                        alert("Error detecting location: " + error.message + ". Please type address manually.");
+                        pickupInput.value = "Error detecting location.";
+                        pickupInput.style.borderColor = "#ef4444";
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // --- 4. SEARCH FUNCTIONS (Google Maps Style) ---
+        function searchPickupMap() {
+            const query = document.getElementById('pickupSearch').value;
+            const mapBox = document.querySelector('.map-container');
+            if(mapBox) mapBox.innerHTML = "Loading...";
+            
+            if (!query) {
+                if(mapBox) mapBox.innerHTML = "Please enter a city name.";
+                return;
+            }
+
+            // Use OpenCage (Free Geocoding) to search cities
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        const { lat, lon, display_name, display_place } = data[0];
+                        
+                        // Fly Map to result
+                        pickupMap.flyTo([lat, lon], 14);
+                        
+                        // Update UI
+                        const text = display_name + (display_place ? `, ` + display_place : ``);
+                        document.getElementById('pickup').value = text;
+                        document.getElementById('pickup').style.borderColor = "#10B981";
+                        
+                        // Update Marker
+                        if (pickupMarker) pickupMap.removeLayer(pickupMarker);
+                        pickupMarker = L.marker([lat, lon]).addTo(pickupMap);
+                        
+                        if(mapBox) mapBox.innerHTML = "Found!";
+                    } else {
+                        if(mapBox) mapBox.innerHTML = "City not found.";
+                    }
+                })
+                .catch(error => {
+                    console.error("Search error:", error);
+                    if(mapBox) mapBox.innerHTML = "Error loading map.";
+                });
+        }
+
+        function searchDropMap() {
+            const query = document.getElementById('dropSearch').value;
+            const mapBox = document.querySelector('.map-container'); // This will look for the box *inside* the active form area
+            
+            // Visual feedback inside map container (Destination)
+            if (mapBox) mapBox.innerHTML = "Loading...";
+
+            if (!query) {
+                // If mapBox exists (Destination section is open), show error
+                if(mapBox) mapBox.innerHTML = "Please enter a city name.";
+                return;
+            }
+            
+            // Use OpenCage
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        const { lat, lon, display_name, display_place } = data[0];
+                        
+                        // Fly Map
+                        dropMap.flyTo([lat, lon], 14);
+                        
+                        // Update UI
+                        const text = display_name + (display_place ? `, ` + display_place : ``);
+                        document.getElementById('drop').value = text;
+                        
+                        // Update Marker
+                        if (dropMarker) dropMap.removeLayer(dropMarker);
+                        dropMarker = L.marker([lat, lon]).addTo(dropMap);
+                        
+                        if(mapBox) mapBox.innerHTML = "Found!";
+                    } else {
+                        if(mapBox) mapBox.innerHTML = "City not found.";
+                    }
+                })
+                .catch(error => {
+                    console.error("Search error:", error);
+                    if(mapBox) mapBox.innerHTML = "Error loading map.";
+                });
+        }
+
+        // --- 5. MANUAL ENTRY (URL & Coords) ---
+        function setMapUrl(type) {
+            const input = document.getElementById(type + 'Url');
+            const url = input.value.trim();
+            const inputField = document.getElementById(type);
+            const map = type === 'pickup' ? pickupMap : dropMap;
+
+            if (!url) {
+                alert("Please enter a valid URL.");
+                return;
+            }
+
+            // Validate URL (Basic check)
+            if (url.startsWith('http')) {
+                // Open Google Maps in new tab
+                window.open(url, '_blank');
+                // Fallback: Update text input just in case
+                inputField.value = "Open Google Maps (See New Tab)";
+            } else {
+                alert("Please enter a valid HTTP link.");
+            }
+        }
+
+        function setCoords(type) {
+            const input = document.getElementById(type + 'Coords');
+            const coordsStr = input.value.trim();
+            const map = type === 'pickup' ? pickupMap : dropMap;
+            
+            const parts = coordsStr.split(',');
+            if (parts.length !== 2) {
+                alert("Format: Latitude, Longitude (e.g., 26.79, 83.37)");
+                return;
+            }
+
+            const lat = parseFloat(parts[0]);
+            const lng = parseFloat(parts[1]);
+
+            if (isNaN(lat) || isNaN(lng)) {
+                alert("Invalid coordinates.");
+                return;
+            }
+
+            // Fly Map
+            map.flyTo([lat, lng], 14);
+            
+            // Update Input
+            inputField.value = "Used Custom Coords";
+        }
+
+        function toggleOptions() {
+            const el = document.getElementById('advancedOptions');
+            if (el.style.display === 'none') {
+                el.style.display = 'grid';
+            } else {
+                el.style.display = 'none';
+            }
+        }
+
+        // --- 6. FORM HANDLING ---
         document.getElementById('taxiForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // 1. Get Form Values
+            // 1. Get Values
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
             const pickup = document.getElementById('pickup').value;
@@ -732,115 +951,6 @@
 
             // 5. Clear form
             this.reset();
-        });
-
-        // 🗺️ MAP LOGIC (ROBUSTED & FIXED)
-        let pickupMap, dropMap;
-
-        window.onload = function() {
-            // Default Center View (Ayodhya/Gorakhpur area)
-            const defaultLat = 26.7951;
-            const defaultLng = 82.1924;
-
-            // 1. Init Pickup Map
-            try {
-                pickupMap = L.map('pickupMap').setView([defaultLat, defaultLng], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickupMap);
-                
-                // 2. Init Destination Map
-                dropMap = L.map('dropMap').setView([defaultLat, defaultLng], 13);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(dropMap);
-
-                // 3. Add Search to Destination Map (Only)
-                const searchControl = L.control({position: 'topleft'}).addTo(dropMap);
-
-                // 4. Add Zoom Control to Both Maps
-                L.control.zoom({position: 'topright'}).addTo(pickupMap);
-                L.control.zoom({position: 'topright'}).addTo(dropMap);
-
-            } catch (error) {
-                console.error("Error loading maps:", error);
-                alert("Maps failed to load. Refresh page.");
-            }
-        };
-
-        // 📍 GET LOCATION FUNCTION (FIXED)
-        function getCurrentLocation() {
-            const pickupInput = document.getElementById('pickup');
-            
-            if (!navigator.geolocation) {
-                alert("Geolocation is not supported by this browser.");
-                return;
-            }
-
-            // Show loading text
-            pickupInput.value = "Locating...";
-
-            navigator.geolocation.getCurrentPosition({
-                enableHighAccuracy: true,
-                timeout: 10000 // 10 second timeout
-            }, 
-            (position) => {
-                // Success
-                const lat = position.coords.latitude.toFixed(4);
-                const lng = position.coords.longitude.toFixed(4);
-                
-                // Fly to User's Location (Zoom level 14-16)
-                pickupMap.flyTo([lat, lng], 14);
-
-                // 📍 Add User's Marker (Blue Pin)
-                L.marker([lat, lng], {
-                    title: "You are here",
-                    draggable: false,
-                    icon: L.icon({
-                        iconUrl: 'https://cdn-icons-png.flaticon.com/512/512/taxi-icon.png',
-                        iconSize: [40, 40],
-                        iconAnchor: [20, 40]
-                    })
-                }).addTo(pickupMap);
-
-                // ✅ Feedback: Fill input with friendly text
-                pickupInput.value = "Current GPS Location (Click map to edit)";
-
-                // 🟢 Visual Feedback: Green Border
-                pickupInput.style.borderColor = "#10B981";
-
-            }, 
-            (error) => {
-                console.error("Geolocation error:", error);
-                
-                // 📵 USER FRIENDLY ALERT
-                if(error.code === 1) {
-                    alert("Location permission denied. Please allow access or type your address manually.");
-                } else {
-                    alert("Could not find location: " + error.message + ". Please type your address manually.");
-                }
-                
-                pickupInput.value = "";
-                pickupInput.style.borderColor = "#d1d5db"; // Reset border color on error
-            });
-        }
-
-        // 🔍 MAP CLICK HANDLER (ONLY FOR PICKUP)
-        // This ensures clicking Pickup Map ONLY affects Pickup
-        pickupMap.on('click', function(e) {
-            const latlng = e.latlng;
-            
-            // 1. Get Name (Reverse Geocode)
-            // Using fetch with 'no-cors' to avoid blocking on local files
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`)
-            .then(response => {
-                if(response && response.address && response.address.city) {
-                    const address = `${response.address.city}, ${response.address.state || ''}`;
-                    document.getElementById('pickup').value = address;
-                    
-                    // Visual Feedback
-                    document.getElementById('pickup').style.borderColor = "#10B981";
-                })
-                .catch(error => {
-                    console.error("Address fetch error:", error);
-                    alert("Could not fetch address (Error: " + error.message + "). Please type manually.");
-                });
         });
     </script>
 </body>
