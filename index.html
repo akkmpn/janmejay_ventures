@@ -614,63 +614,198 @@
         <span>Booking Request Sent! We will call you shortly.</span>
     </div>
 
-    <!-- Scripts -->
-       <script>
-        document.getElementById('taxiForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // 1. Get Form Values
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const pickup = document.getElementById('pickup').value;
-            const drop = document.getElementById('drop').value;
-            const date = document.getElementById('date').value;
-            const type = document.getElementById('type').value;
-            
-            // 2. Get Contact Preference
-            const contactMethod = document.querySelector('input[name="contactMethod"]:checked').value;
+    <script>
+        // --- STATE MANAGEMENT ---
+        let pickupMap, dropMap;
+        let pickupMarker, dropMarker;
+        
+        // Init Maps when page loads
+        window.onload = function() {
+            // Default Center View (Gorakhpur Area)
+            const defaultLat = 26.7951;
+            const defaultLng = 83.376;
 
-            // 3. Create Base Message
-            const baseMessage = `New Booking Request (Janmejay Ventures)\n` +
-                            `-----------------------\n` +
-                            `Name: ${name}\n` +
-                            `Phone: ${phone}\n` +
-                            `Pickup: ${pickup}\n` +
-                            `Drop: ${drop}\n` +
-                            `Date: ${date}\n` +
-                            `Type: ${type}`;
+            // Init Pickup Map
+            try {
+                pickupMap = L.map('pickupMap').setView([defaultLat, defaultLng], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(pickupMap);
+                pickupMarker = L.marker([defaultLat, defaultLng]).addTo(pickupMap);
+            } catch (e) {
+                console.error("Pickup Map Init Error:", e);
+            }
+            
+            // Init Destination Map
+            dropMap = L.map('dropMap').setView([defaultLat, defaultLng], 14); // Destination is just an example
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(dropMap);
+            } catch (e) {
+                console.error("Drop Map Init Error:", e);
+            }
+        };
 
-            // 4. Send based on choice
-            if (contactMethod === 'whatsapp') {
-                // WHATSAPP: Works normally
-                const encodedMessage = encodeURIComponent(baseMessage).replace(/%0A/g, '%0A'); 
-                const whatsappUrl = `https://wa.me/918009136859?text=${encodedMessage}`;
-                window.open(whatsappUrl, '_blank');
+        // --- 2. GEOLOCATION ---
+        function getCurrentLocation() {
+            const pickupInput = document.getElementById('pickup');
+            const mapBox = document.querySelector('.map-container');
+            
+            if (navigator.geolocation) {
+                // Visual feedback
+                if(mapBox) mapBox.innerHTML = "Locating...";
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude.toFixed(4);
+                        const lng = position.coords.longitude.toFixed(4);
+                        
+                        // Fly Map to User's Location
+                        // 💡 IMPORTANT: We use user's GPS
+                        pickupMap.flyTo([lat, lng], 14);
+                        
+                        // Update UI
+                        pickupInput.value = "Current GPS Location (Click map to edit)";
+                        
+                        // 📍 Add User's Marker
+                        // Using same icon for both maps
+                        const markerUrl = 'https://cdn-icons-png.flaticon.com/512/512/taxi-icon.png';
+                        L.marker([lat, lng], {
+                            title: "You are here",
+                            draggable: false,
+                            icon: L.icon({
+                                iconUrl: 'https://cdn-icons-png.flaticon.com/512/512/taxi-icon.png',
+                                iconSize: [40, 40],
+                                iconAnchor: [20, 40]
+                            })
+                        }).addTo(pickupMap);
+
+                        // ✅ Feedback: Green Border
+                        pickupInput.style.borderColor = "#10B981";
+
+                    },
+                    (error) => {
+                        console.error("Geolocation error:", error);
+                        
+                        // 📵 USER FRIENDLY ALERT
+                        alert("Error detecting location: " + error.message + ". Please type your address manually.");
+                        
+                        pickupInput.value = "";
+                        pickupInput.style.borderColor = "#ef4444"; // Reset border color on error
+                    }
+                );
             } else {
-                // EMAIL: Use 'Simulate Click' Method for Telegram/In-built browsers
-                const subject = encodeURIComponent("New Taxi Booking Request");
-                const body = encodeURIComponent(baseMessage);
-                
-                // We use ?to= explicitly to try and force the email address
-                const mailtoLink = `mailto:?to=janmejaip@gmail.com&subject=${subject}&body=${body}`;
-                
-                // Create a temporary link element
-                const a = document.createElement('a');
-                a.href = mailtoLink;
-                
-                // Add to body (required for some browsers to register element)
-                document.body.appendChild(a);
-                
-                // Simulate a mouse click
-                a.click();
-                
-                // Remove element
-                document.body.removeChild(a);
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // --- 3. SEARCH FUNCTIONS (Google Maps Style) ---
+        function searchPickupMap() {
+            const query = document.getElementById('pickupSearch').value;
+            const mapBox = document.querySelector('.map-container');
+            if(mapBox) mapBox.innerHTML = "Loading..."; // This appears inside map container (Destination section)
+
+            if (!query) {
+                if (mapBox) mapBox.innerHTML = "Please enter a city name.";
+                return;
             }
 
-            // 5. Clear form
-            this.reset();
-        });
+            // Use OpenCage (Free Geocoding - Nominatim)
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Smart Centering Logic (Gorakhpur Area)
+                        const { lat, lon, display_name, display_place } = data[0];
+                        
+                        // If it's a generic city (e.g. "Lucknow"), keep map view local
+                        // If it's a specific city (e.g. "Ayodhya"), move map there
+                        if (display_name.toLowerCase().includes('gorakhpur')) {
+                            // Gorakhpur District
+                            destLat = 26.7951;
+                            destLng = 83.376;
+                        } else if (display_name.toLowerCase().includes('ayodhya')) {
+                            // Ayodhya District
+                            destLat = 26.7951;
+                            destLng = 82.1924;
+                        } else {
+                            // Default fallback to central UP location
+                            destLat = 26.7951;
+                            destLng = 83.376;
+                        }
+
+                        // Fly Map to Location
+                        dropMap.flyTo([destLat, destLng], 14);
+                        
+                        // Update UI (Destination Input)
+                        const text = display_name + (display_place ? `, ` + display_place : ``);
+                        document.getElementById('drop').value = text;
+                        document.getElementById('drop').style.borderColor = "#10B981";
+                        
+                        // Update Marker
+                        if (dropMarker) dropMap.removeLayer(dropMarker);
+                        dropMarker = L.marker([destLat, destLng]).addTo(dropMap);
+                    } else {
+                        if(dropMap) mapBox.innerHTML = "City not found.";
+                    }
+                })
+                .catch(error => {
+                    console.error("Search error:", error);
+                    if(mapBox) mapBox.innerHTML = "Error loading map.";
+                });
+        }
+
+        // --- 4. MANUAL ENTRY (URL & Coords) ---
+        function setMapUrl(type) {
+            const input = document.getElementById(type + 'Url');
+            const map = type === 'pickup' ? pickupMap : dropMap;
+
+            // Validate URL (Basic check)
+            if (!url) {
+                alert("Please enter a valid URL.");
+                return;
+            }
+
+            if (url.startsWith('http')) {
+                // Open Google Maps in new tab
+                window.open(url, '_blank');
+                // Fallback
+                inputField.value = "Open Google Maps (See New Tab)";
+            } else {
+                alert("Please enter a valid HTTP link.");
+            }
+        }
+
+        function setCoords(type) {
+            const input = document.getElementById(type + 'Coords');
+            const coordsStr = input.value.trim();
+            const map = type === 'pickup' ? pickupMap : dropMap;
+            
+            const parts = coordsStr.split(',');
+            
+            if (parts.length !== 2) {
+                alert("Format: Latitude, Longitude (e.g., 26.45, 81.23)");
+                return;
+            }
+
+            const lat = parseFloat(parts[0]);
+            const lng = parseFloat(parts[1]);
+
+            if (isNaN(lat) || isNaN(lng)) {
+                alert("Invalid coordinates.");
+                return;
+            }
+
+            // Fly Map
+            map.flyTo([lat, lng], 14);
+            
+            // Update Input Field
+            inputField.value = "Used Custom Coords";
+            
+            // Add Marker
+            const marker = L.marker([lat, lng], {
+                title: "User's Location",
+                draggable: false
+            };
+
+            marker.addTo(map);
+        }
     </script>
 </body>
 </html>
